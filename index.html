@@ -10,6 +10,9 @@
 
 @media print{
  body{background:#fff!important;color:#111!important}.sidebar,.topbar,.mobileNav,.no-print,#toast{display:none!important}.shell{display:block!important}.main{padding:0!important}.card{box-shadow:none!important;border:0!important}.print-doc{display:block!important}.print-doc table{width:100%;border-collapse:collapse}.print-doc th,.print-doc td{border:1px solid #555;padding:7px}.print-doc th{background:#ffeb00!important;color:#000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.print-doc .zone{font-weight:700}.print-doc input{border:0!important;background:transparent!important;padding:0!important}.print-doc .hide-print{display:none!important}}
+
+/* Compact grouped desktop navigation */
+.sidebar{width:238px;padding:17px 11px;transition:width .18s ease}.main{margin-left:238px;width:calc(100% - 238px);transition:margin-left .18s ease,width .18s ease}.nav{margin-top:16px;gap:3px}.navGroup{margin-bottom:3px}.nav .navGroupHead{width:100%;display:flex;align-items:center;gap:9px;padding:10px 11px;font-size:13px;font-weight:750;color:#d9e2ec}.nav .navGroupHead.groupActive{color:#fff;background:#202b39}.navIcon{width:19px;text-align:center;font-size:17px;flex-shrink:0}.navLabel{flex:1}.navChevron{font-size:18px;color:#9da7b4}.navChildren{display:grid;gap:2px;padding:3px 0 5px 26px}.nav .navChildren button{padding:8px 10px;font-size:12.5px;border-radius:8px}.nav .sideCollapse{display:flex;align-items:center;gap:10px;padding:9px 11px;font-size:12px;color:#9da7b4;margin-bottom:9px;width:100%}.sidebarCollapsed .sidebar{width:64px}.sidebarCollapsed .main{margin-left:64px;width:calc(100% - 64px)}.sidebarCollapsed .brand{font-size:0}.sidebarCollapsed .brand small,.sidebarCollapsed #sideLogo,.sidebarCollapsed .navLabel,.sidebarCollapsed .navChevron,.sidebarCollapsed .navChildren,.sidebarCollapsed .sideCollapse span{display:none!important}.sidebarCollapsed .nav .navGroupHead{justify-content:center;padding:11px 6px}.sidebarCollapsed .navIcon{font-size:20px}.sidebarCollapsed .nav .sideCollapse{justify-content:center}@media(max-width:900px){.sidebarCollapsed .sidebar{display:none}.sidebarCollapsed .main{margin-left:0;width:100%}}
 </style>
 
 <style>
@@ -124,7 +127,25 @@ function toast(m,bad=false){const t=$('toast');t.textContent=m;t.style.backgroun
 function head(t,s=''){$('pageTitle').textContent=t;$('pageSub').textContent=s}
 function metric(k,v){return `<div class="card metric"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div></div>`}
 function nav(){if(me.role==='admin')return [['dashboard','Panou'],['sitecontrol','Fișa șantierelor'],['finance','Contracte & încasări'],['reports','Rapoarte'],['newReport','Raport nou'],['attendance','Pontaj & salarii'],['procurement','Aprovizionare'],['procurementSettings','Responsabili aprovizionare'],['costs','Centru de cost'],['documents','Devize & oferte'],['measurements','Măsurători'],['sites','Șantiere'],['prices','Lista de prețuri'],['users','Utilizatori'],['activity','Istoric activitate'],['broadcast','Informări'],['notifications','Notificări'],['settings','Personalizare'],['profile','Profilul meu']];const n=[['dashboard','Acasă'],['newReport','Raport nou'],['reports','Rapoartele mele'],['procurement','Comenzi']];if(me.cost_access)n.push(['costs','Centru de cost']);n.push(['notifications','Notificări']);n.push(['profile','Profilul meu']);return n}
-function renderNav(){const n=nav();$('sideNav').innerHTML=n.map(([id,l])=>`<button data-page="${id}" class="${page===id?'active':''}">${l}</button>`).join('');$('mobileNav').innerHTML=n.map(([id,l])=>`<button data-page="${id}" class="${page===id?'active':''}">${l}</button>`).join('');document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page))}
+const adminNavGroups=[['Panou principal','▦',['dashboard']],['Șantiere','▤',['sites','sitecontrol','measurements']],['Activitate','◷',['reports','newReport','attendance']],['Financiar','▥',['finance','costs','documents']],['Aprovizionare','▣',['procurement','procurementSettings']],['Administrare','⚙',['prices','users','activity','broadcast','settings']],['Cont','◉',['notifications','profile']]];
+let openNavGroup=null;
+function renderNav(){
+ const n=nav(), side=$('sideNav');
+ if(me.role==='admin'){
+  const groups=adminNavGroups.filter(g=>g[2].some(id=>n.some(x=>x[0]===id)));
+  const activeGroup=groups.find(g=>g[2].includes(page))?.[0];
+  if(!openNavGroup)openNavGroup=activeGroup||'Panou principal';
+  side.innerHTML='<button type="button" class="sideCollapse" id="sideCollapse" title="Restrânge / extinde meniul">☰ <span>Restrânge meniul</span></button>'+groups.map(([name,icon,ids])=>{
+   const expanded=openNavGroup===name;
+   return '<div class="navGroup"><button type="button" class="navGroupHead '+(expanded?'expanded ':'')+(ids.includes(page)?'groupActive':'')+'" data-group="'+esc(name)+'" title="'+esc(name)+'"><span class="navIcon">'+icon+'</span><span class="navLabel">'+esc(name)+'</span><span class="navChevron">'+(expanded?'⌄':'›')+'</span></button><div class="navChildren '+(expanded?'':'hidden')+'">'+ids.map(id=>{const item=n.find(x=>x[0]===id);return item?'<button type="button" data-page="'+id+'" class="'+(page===id?'active':'')+'">'+esc(item[1])+'</button>':''}).join('')+'</div></div>';
+  }).join('');
+  side.querySelectorAll('[data-group]').forEach(b=>b.onclick=()=>{openNavGroup=openNavGroup===b.dataset.group?'':b.dataset.group;renderNav()});
+  side.querySelector('#sideCollapse').onclick=()=>{document.body.classList.toggle('sidebarCollapsed');try{localStorage.setItem('sidebarCollapsed',document.body.classList.contains('sidebarCollapsed')?'1':'0')}catch(e){}};
+ }else{side.innerHTML=n.map(([id,l])=>'<button data-page="'+id+'" class="'+(page===id?'active':'')+'">'+esc(l)+'</button>').join('')}
+ $('mobileNav').innerHTML=n.map(([id,l])=>'<button data-page="'+id+'" class="'+(page===id?'active':'')+'">'+esc(l)+'</button>').join('');
+ document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{if(me.role==='admin'){const g=adminNavGroups.find(x=>x[2].includes(b.dataset.page));if(g)openNavGroup=g[0]}go(b.dataset.page)});
+}
+try{if(localStorage.getItem('sidebarCollapsed')==='1')document.body.classList.add('sidebarCollapsed')}catch(e){}
 async function go(p){page=p;renderNav();await renderPage()}
 async function q(promise){const {data,error}=await promise;if(error)throw error;return data}
 const VAPID_PUBLIC_KEY='BNS0ENYgdpBn5JaWQql8AJt50zmn-nJXYUrN7o5H6D1FNDmEZt1HzHPOQYbjJOj9-4x87gQq15bnaOspK7g5H5s';
