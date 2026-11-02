@@ -447,7 +447,7 @@ $('logout').onclick=async()=>{await sb.auth.signOut();me=null;showLogin()};
 sb.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT')showLogin()});
 boot();
 </script>
-<div id="pwaInstallBanner"><img src="/icon-192.png"><div class="txt"><b>Instalează Manager Șantier</b><span id="pwaInstallText">Acces rapid direct de pe ecranul telefonului.</span></div><button class="btn small" id="pwaInstallBtn" type="button">Instalează</button><button class="btn secondary small" id="pwaInstallClose" type="button">×</button></div>
+<div id="pwaInstallBanner"><img src="/alpodec-icon.svg" alt="ALPODEC"><div class="txt"><b>Instalează Manager Șantier</b><span id="pwaInstallText">Acces rapid direct de pe ecranul telefonului.</span></div><button class="btn small" id="pwaInstallBtn" type="button">Instalează</button><button class="btn secondary small" id="pwaInstallClose" type="button">×</button></div>
 <script>
 (function(){
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(console.error));
@@ -456,8 +456,8 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;setTim
 window.addEventListener('appinstalled',()=>B()?.classList.remove('show'));
 window.addEventListener('load',()=>{
 const ios=/iphone|ipad|ipod/i.test(navigator.userAgent),standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;if(standalone)return;
-if(ios){document.getElementById('pwaInstallText').textContent='Pe iPhone: Share → Add to Home Screen.';setTimeout(()=>B()?.classList.add('show'),1200)}
-document.getElementById('pwaInstallBtn')?.addEventListener('click',async()=>{if(dp){dp.prompt();await dp.userChoice;dp=null;B()?.classList.remove('show')}else if(ios)alert('Safari → Share → Add to Home Screen → Add')});
+if(ios){document.getElementById('pwaInstallText').textContent='Pe iPhone: Safari → Partajare → Adaugă pe ecranul principal.';setTimeout(()=>B()?.classList.add('show'),1200)}
+document.getElementById('pwaInstallBtn')?.addEventListener('click',async()=>{if(dp){dp.prompt();await dp.userChoice;dp=null;B()?.classList.remove('show')}else if(ios)alert('Safari → Partajare → Adaugă pe ecranul principal → Adaugă')});
 document.getElementById('pwaInstallClose')?.addEventListener('click',()=>B()?.classList.remove('show'));
 });})();
 </script>
