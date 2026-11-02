@@ -415,7 +415,47 @@ $('costSite').onchange=draw;
 if($('cancelCostEdit'))$('cancelCostEdit').onclick=()=>{const f=$('costForm');f.reset();f.cid.value='';$('costFormTitle').textContent='Adaugă factură / cost';$('cancelCostEdit').classList.add('hidden')};
 if($('costForm'))$('costForm').file.addEventListener('change',async ev=>{const form=$('costForm'),file=ev.target.files[0],status=$('costAiStatus'),items=$('costAiItems');if(!file)return;status.textContent='✨ AI analizează factura...';items.innerHTML='';form.dataset.aiItems='[]';try{const path=`${form.site.value}/${me.id}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;const {error:upErr}=await sb.storage.from('cost-documents').upload(path,file,{contentType:file.type||'application/octet-stream'});if(upErr)throw upErr;form.dataset.aiUploadPath=path;const {data,error}=await sb.functions.invoke('read-invoice-ai',{body:{storage_path:path,bucket:'cost-documents'}});if(error)throw error;if(!data?.ok)throw Error(data?.error||'Factura nu a putut fi citită');const x=data.data||{};if(x.supplier!=null)form.supplier.value=x.supplier;if(x.invoice_number!=null)form.invoice.value=x.invoice_number;if(x.invoice_date)form.date.value=x.invoice_date;if(x.subtotal!=null)form.net.value=x.subtotal;if(x.vat!=null)form.vat.value=x.vat;if(x.total!=null)form.gross.value=x.total;if(x.description!=null)form.description.value=x.description;form.dataset.aiItems=JSON.stringify(x.items||[]);status.textContent=`Citire AI finalizată (încredere ${x.confidence??'?'}%). Verifică toate valorile înainte de salvare.`;if(Array.isArray(x.items)&&x.items.length)items.innerHTML='<div class="sectionHead"><h3>Produse identificate ('+x.items.length+')</h3></div><div style="overflow:auto"><table><thead><tr><th>Produs</th><th>Cantitate</th><th>UM</th><th>Preț unitar</th><th>Total</th></tr></thead><tbody>'+x.items.map(p=>`<tr><td>${esc(p.name||'')}</td><td>${p.quantity??'-'}</td><td>${esc(p.unit||'')}</td><td>${p.unit_price??'-'}</td><td>${p.total??'-'}</td></tr>`).join('')+'</tbody></table></div>';if(x.warnings?.length)status.textContent+=' Atenție: '+x.warnings.join('; ')}catch(e){status.textContent='Citirea AI a eșuat: '+(e.message||String(e))+'. Poți completa manual.';toast(status.textContent,true)}});
 if($('costForm'))$('costForm').onsubmit=async ev=>{ev.preventDefault();if(!perms.can_add&&!ev.target.cid.value)return toast('Nu ai drept de adăugare.',true);if(ev.target.cid.value&&!perms.can_edit)return toast('Nu ai drept de editare.',true);const f=new FormData(ev.target),file=ev.target.file.files[0],id=f.get('cid');let storage_path=id?(costs.find(x=>x.id===id)?.storage_path||null):null;try{if(file && ev.target.dataset.aiUploadPath){storage_path=ev.target.dataset.aiUploadPath}else if(file){storage_path=`${f.get('site')}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;const {error}=await sb.storage.from('cost-documents').upload(storage_path,file,{contentType:file.type||'application/octet-stream'});if(error)throw error}const payload={site_id:f.get('site'),cost_date:f.get('date'),supplier:f.get('supplier')||null,invoice_no:f.get('invoice')||null,category:f.get('category'),description:f.get('description')||null,amount_net:Number(f.get('net')||0),vat_amount:Number(f.get('vat')||0),amount_gross:Number(f.get('gross')||0),paid:f.get('paid')==='true',storage_path,updated_at:new Date().toISOString()};if(id){const row=await q(sb.from('project_costs').update(payload).eq('id',id).select('*').single());const i=costs.findIndex(x=>x.id===id);costs[i]=row;toast('Cost actualizat')}else{const row=await q(sb.from('project_costs').insert(payload).select('*').single());costs.unshift(row);toast('Cost salvat')}ev.target.reset();ev.target.cid.value='';if($('costFormTitle'))$('costFormTitle').textContent='Adaugă factură / cost';if($('cancelCostEdit'))$('cancelCostEdit').classList.add('hidden');draw()}catch(e){toast(e.message,true)}};draw()}
-async function documentsPage(){if(me.role!=='admin')return go('dashboard');head('Devize, situații & oferte','Documente pe zone și faze de lucru, cu export PDF real');const sites=await q(sb.from('sites').select('*').order('name'));let docs=await q(sb.from('estimates').select('*').order('document_date',{ascending:false}));$('content').innerHTML=`<div class="card no-print"><div class="sectionHead"><h2>Documente</h2><button id="newDoc" class="btn">+ Document nou</button></div><table><thead><tr><th>Data</th><th>Tip</th><th>Nr.</th><th>Titlu</th><th>Șantier</th><th>Status</th><th></th></tr></thead><tbody id="docsBody"></tbody></table></div><div id="docEditor" class="section"></div>`;
+
+async function syncAutomaticEstimates(){
+ // Only active draft documents tagged by this feature; sent/finalized documents stay frozen.
+ await Promise.all([loadReports(),loadCollaborations()]);
+ const works=await q(sb.from('works').select('id,name,unit,category'));
+ const byWork=new Map(works.map(w=>[w.id,w]));
+ const groups=collaborationData((cache.reports||[]).filter(r=>['submitted','approved'].includes(r.status)));
+ const bySite=new Map();
+ for(const g of groups){
+  if(g.declaredColleagues.length&&!g.confirmed)continue; // Never double count unconfirmed team work.
+  const r=g.members[0],w=byWork.get(r.work_id)||{},qty=Number(g.quantity||0);
+  if(!r.site_id||!r.work_id||qty<=0)continue;
+  const unit=String(r.report_unit||r.unit||w.unit||'mp').toUpperCase(),zone=String(r.zone||'').trim();
+  const key=[r.work_id,zone.toLowerCase(),unit].join('|');
+  if(!bySite.has(r.site_id))bySite.set(r.site_id,new Map());
+  const map=bySite.get(r.site_id),prev=map.get(key);
+  if(prev){prev.quantity+=qty;continue}
+  map.set(key,{key,zone,work_phase:w.name||r.work_name||'Lucrare',quantity:qty,unit,unit_price:Number(r.unit_price_snapshot||0)});
+ }
+ const siteRows=await q(sb.from('sites').select('id,name,client,address'));
+ const docs=await q(sb.from('estimates').select('*').eq('document_type','deviz'));
+ for(const [siteId,lines] of bySite){
+  const site=siteRows.find(x=>x.id===siteId);
+  let doc=docs.find(x=>x.site_id===siteId&&x.notes==='AUTO_FROM_REPORTS'&&['draft','salvat'].includes(x.status));
+  if(!doc){
+   // Do not silently reopen or overwrite an already issued automatic document.
+   if(docs.some(x=>x.site_id===siteId&&x.notes==='AUTO_FROM_REPORTS'&&!['draft','salvat'].includes(x.status)))continue;
+   doc=await q(sb.from('estimates').insert({site_id:siteId,document_type:'deviz',title:'Deviz automat — '+(site?.name||'Șantier'),document_date:new Date().toLocaleDateString('en-CA'),client_name:site?.client||null,client_address:site?.address||null,status:'draft',notes:'AUTO_FROM_REPORTS',created_by:me.id,vat_rate:21}).select('*').single());
+  }
+  const existing=await q(sb.from('estimate_items').select('*').eq('estimate_id',doc.id));
+  const byKey=new Map(existing.filter(x=>x.notes?.startsWith('AUTO_KEY:')).map(x=>[x.notes.slice(9),x]));
+  for(const x of lines.values()){
+   const old=byKey.get(x.key);
+   if(old){
+    if(Number(old.quantity)!==x.quantity)await q(sb.from('estimate_items').update({quantity:x.quantity,executed_quantity:x.quantity}).eq('id',old.id));
+   }else await q(sb.from('estimate_items').insert({estimate_id:doc.id,sort_order:existing.length+byKey.size,zone:x.zone,work_phase:x.work_phase,quantity:x.quantity,executed_quantity:x.quantity,unit:x.unit,unit_price:x.unit_price,notes:'AUTO_KEY:'+x.key}));
+  }
+ }
+}
+
+async function documentsPage(){if(me.role!=='admin')return go('dashboard');head('Devize, situații & oferte','Devizele din rapoarte se actualizează automat la deschiderea modulului; cele emise rămân neschimbate');try{await syncAutomaticEstimates()}catch(e){toast('Sincronizare devize: '+e.message,true)}const sites=await q(sb.from('sites').select('*').order('name'));let docs=await q(sb.from('estimates').select('*').order('document_date',{ascending:false}));$('content').innerHTML=`<div class="card no-print"><div class="sectionHead"><h2>Documente</h2><button id="newDoc" class="btn">+ Document nou</button></div><table><thead><tr><th>Data</th><th>Tip</th><th>Nr.</th><th>Titlu</th><th>Șantier</th><th>Status</th><th></th></tr></thead><tbody id="docsBody"></tbody></table></div><div id="docEditor" class="section"></div>`;
 function statusLabel(v){return v==='salvat'?'Salvat':v==='final'?'Final':v==='emis'?'Emis':'Draft'}
 function list(){$('docsBody').innerHTML=docs.map(d=>`<tr><td>${d.document_date}</td><td><span class="pill">${d.document_type==='situatie'?'Situație':d.document_type==='oferta'?'Ofertă':'Deviz'}</span></td><td>${esc(d.document_no||'-')}</td><td><b>${esc(d.title)}</b></td><td>${esc(sites.find(s=>s.id===d.site_id)?.name||'-')}</td><td><span class="pill">${statusLabel(d.status)}</span></td><td><button class="btn secondary small editDoc" data-id="${d.id}">Deschide</button></td></tr>`).join('')||'<tr><td colspan="7" class="empty">Nu există documente.</td></tr>';document.querySelectorAll('.editDoc').forEach(b=>b.onclick=()=>openDoc(b.dataset.id))}
 async function openDoc(id=null){let d=id?docs.find(x=>x.id===id):null;if(!d){d=await q(sb.from('estimates').insert({document_type:'deviz',title:'Document nou',document_date:new Date().toISOString().slice(0,10),status:'draft',created_by:me.id}).select('*').single());docs.unshift(d);list()}let items=await q(sb.from('estimate_items').select('*').eq('estimate_id',d.id).order('sort_order'));
