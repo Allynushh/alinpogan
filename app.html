@@ -46,6 +46,25 @@
 }
 @media(max-width:520px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.title h1{font-size:21px}.metric .v{font-size:20px}}
 @media print{.mobileDrawer{display:none!important}}
+
+/* ALPODEC premium interface — 2026 */
+:root{--bg:#f3f5f8;--card:#fff;--text:#172238;--muted:#66758a;--line:#e4eaf1;--dark:#172b45;--dark2:#203d59;--ok:#087f65;--bad:#c43c49;--warn:#946014;--r:19px;--accent:#c89a55}
+body{background:radial-gradient(ellipse 80% 480px at 80% -130px,#e5ecf5 0%,transparent 78%),var(--bg);color:var(--text);font-feature-settings:"cv11","ss01";-webkit-font-smoothing:antialiased}
+.sidebar{background:linear-gradient(165deg,#14273d 0%,#101d30 65%,#0c1728 100%);border-right:1px solid #ffffff13;box-shadow:8px 0 35px #14273d0b}
+.brand{letter-spacing:-.7px;color:#fff}.brand small{letter-spacing:.04em;color:#a5b8ca}
+.nav button{transition:background .16s,color .16s,transform .16s;border-radius:12px}.nav button:hover{background:#ffffff13;color:#fff;transform:translateX(2px)}.nav button.active{background:linear-gradient(100deg,#315675,#28465f);color:#fff;box-shadow:inset 3px 0 0 var(--accent)}
+.main{padding:29px 31px 45px}.topbar{margin-bottom:26px;padding-bottom:19px;border-bottom:1px solid #dce4ed}.title h1{font-size:clamp(23px,2.3vw,31px);letter-spacing:-.9px;font-weight:850}.title p{line-height:1.5}
+.card{border:1px solid #e4eaf1;border-radius:19px;box-shadow:0 3px 9px #192e4605,0 12px 32px #192e4607;padding:20px;transition:box-shadow .18s}.card:hover{box-shadow:0 5px 15px #192e4608,0 15px 38px #192e4609}
+.metric{position:relative;overflow:hidden;min-height:114px}.metric:before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#c89a55,#d6b783 55%,transparent)}.metric .k{font-weight:650}.metric .v{font-size:clamp(22px,2.1vw,30px);letter-spacing:-.9px;color:#18314b}
+.btn{background:linear-gradient(135deg,#213f5d,#152c46);border:1px solid #193651;border-radius:11px;padding:11px 17px;box-shadow:0 3px 9px #172b4520;transition:transform .15s,box-shadow .15s,filter .15s}.btn:hover{filter:brightness(1.12);transform:translateY(-1px);box-shadow:0 7px 18px #172b4524}.btn:active{transform:translateY(0)}.btn.secondary{background:#edf2f7;border-color:#dfe6ee;color:#20354c;box-shadow:none}.btn.danger{background:#b73d49;border-color:#b73d49}
+input,select,textarea{border:1px solid #d9e2ec;border-radius:11px;background:#fbfcfe;min-height:42px;transition:border-color .15s,box-shadow .15s}input:focus,select:focus,textarea:focus{outline:none;border-color:#547c9d;box-shadow:0 0 0 3px #547c9d24;background:#fff}input[type="checkbox"],input[type="radio"]{min-height:0;accent-color:#2d5676}label{color:#45566b;letter-spacing:.01em}
+.sectionHead h2{font-size:18px;letter-spacing:-.4px;color:#1c324b}th{background:#f7f9fc;color:#64768b;letter-spacing:.075em}tbody tr{transition:background .12s}tbody tr:hover{background:#f7fafe}td{color:#33445a}th,td{border-bottom-color:#e7edf3}
+.badge,.pill{background:#eaf0f6;color:#27445f;border:1px solid #dce7f0;font-weight:750}.report{background:#fff;border-color:#e0e7ef;box-shadow:0 2px 10px #152d4506}.notice{border-radius:13px}.loginWrap{background:radial-gradient(circle at 80% 10%,#365a75 0%,transparent 45%),linear-gradient(145deg,#0d1d30,#203a55)}.loginCard{border:1px solid #ffffff40;box-shadow:0 28px 90px #0006}
+.employeeHero{border-radius:19px}.employeeAction{transition:transform .16s,box-shadow .16s}.employeeAction:hover{transform:translateY(-2px);box-shadow:0 10px 24px #172b451b}.orderHomeCard{border-radius:19px}
+@media(max-width:900px){.main{padding:17px 14px 100px}.topbar{padding-bottom:14px;margin-bottom:18px}.mobileNav{background:#10253b;border-top:1px solid #ffffff20;box-shadow:0 -7px 22px #12253a25}.mobileNav button.active{background:#2d506c}.card{padding:16px}.metric{min-height:100px}}
+@media(max-width:520px){.title h1{font-size:23px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.metric .v{font-size:23px}.metric .k{font-size:12px}.card{border-radius:16px}.employeeActions{gap:9px}}
+@media print{body{background:#fff!important}.card{box-shadow:none!important}.metric:before{display:none!important}}
+
 </style>
 
 <style>
