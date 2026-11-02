@@ -705,7 +705,7 @@ input[type=file]{max-width:100%;font-size:14px}
 <div id="appUpdateBanner" role="status" aria-live="polite"><div class="updateCopy"><strong>Este disponibilă o versiune nouă</strong><span>Actualizează aplicația pentru cele mai recente îmbunătățiri.</span></div><button type="button" id="appUpdateNow">Actualizează</button></div>
 <script>
 (function(){
- const CURRENT_APP_VERSION='2026.11.03.1';
+ const CURRENT_APP_VERSION='2026.11.03.2';
  const banner=document.getElementById('appUpdateBanner');
  const button=document.getElementById('appUpdateNow');
  let checking=false,availableVersion='';
@@ -728,18 +728,18 @@ input[type=file]{max-width:100%;font-size:14px}
   try{
    if('serviceWorker' in navigator){
     const reg=await navigator.serviceWorker.getRegistration();
-    if(reg)await reg.update();
+    if(reg){await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});}
    }
   }catch(e){console.warn('Actualizare service worker',e)}
   const url=new URL(window.location.href);
-  url.searchParams.set('app_version',availableVersion);
+  url.searchParams.set('app_version',availableVersion);url.searchParams.set('refresh',String(Date.now()));
   window.location.replace(url.toString());
  });
  window.addEventListener('focus',checkAppVersion);
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkAppVersion()});
  window.addEventListener('online',checkAppVersion);
- setInterval(checkAppVersion,120000);
- setTimeout(checkAppVersion,3500);
+ setInterval(checkAppVersion,30000);
+ setTimeout(checkAppVersion,800);
 })();
 </script>
 </body>
