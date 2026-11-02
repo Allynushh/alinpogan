@@ -492,7 +492,7 @@ async function fuelReceiptsPanel(){
  <label>Vehicul / număr auto<input name="vehicle" placeholder="Ex: BH 00 ABC"></label>
  <label>Stație / furnizor<input name="supplier" placeholder="Ex: OMV"></label>
  <label>Fotografie bon / PDF<input name="photo" type="file" accept="image/*,application/pdf" capture="environment" required></label>
- <label class="full">Observații<input name="notes"></label>
+ <div class="actions full"><button class="btn secondary" type="button" id="fuelReadAi">✨ Citește bonul cu AI</button><span id="fuelAiStatus" class="muted">Verifică datele extrase înainte de salvare.</span></div><label class="full">Observații<input name="notes"></label>
  <div class="actions full"><button class="btn" type="submit">Salvează bonul</button></div></form></div>
  <div class="card"><div class="sectionHead"><h2>Cost combustibil</h2><label>Perioadă<select id="fuelPeriod"><option value="day">Zi</option><option value="week">Săptămână</option><option value="month" selected>Lună</option><option value="all">Toate</option></select></label><input type="date" id="fuelDate" value="${today}"></div>
  <div id="fuelTotals"></div><div style="overflow:auto"><table><thead><tr><th>Data</th><th>Vehicul</th><th>Litri</th><th>Valoare</th><th>Bon</th><th></th></tr></thead><tbody id="fuelRows"></tbody></table></div></div>`;
@@ -517,7 +517,7 @@ async function fuelReceiptsPanel(){
  const x=data.data||{},fuel=(x.items||[]).filter(y=>/motorin|diesel|benz|carbur|fuel|euro 5|euro 95/i.test(y.name||''));const relevant=fuel.length?fuel:(x.items||[]).filter(y=>/lit|litr/i.test(y.unit||''));
  const liters=relevant.reduce((sum,y)=>sum+Number(y.quantity||0),0);
  const amount=fuel.length?fuel.reduce((sum,y)=>sum+Number(y.total||0),0):Number(x.total||0);
- if(x.invoice_date&&/^\\d{4}-\\d{2}-\\d{2}$/.test(x.invoice_date))f.date.value=x.invoice_date;
+ if(x.invoice_date&&/^\d{4}-\d{2}-\d{2}$/.test(x.invoice_date))f.date.value=x.invoice_date;
  if(amount>0)f.amount.value=amount.toFixed(2);
  if(liters>0)f.liters.value=liters.toFixed(3);
  if(x.supplier)f.supplier.value=x.supplier;
