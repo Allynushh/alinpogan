@@ -491,7 +491,7 @@ async function fuelReceiptsPanel(){
  <label>Litri (opțional)<input name="liters" type="number" min="0.001" step="0.001"></label>
  <label>Vehicul / număr auto<input name="vehicle" placeholder="Ex: BH 00 ABC"></label>
  <label>Stație / furnizor<input name="supplier" placeholder="Ex: OMV"></label>
- <label>Fotografie bon / PDF<input name="photo" type="file" accept="image/*,application/pdf" capture="environment" required></label>
+ <label>Fotografie bon / PDF<input name="photo" type="file" accept="image/*,application/pdf" required></label>
  <div class="actions full"><button class="btn secondary" type="button" id="fuelReadAi">✨ Citește bonul cu AI</button><span id="fuelAiStatus" class="muted">Verifică datele extrase înainte de salvare.</span></div><label class="full">Observații<input name="notes"></label>
  <div class="actions full"><button class="btn" type="submit">Salvează bonul</button></div></form></div>
  <div class="card"><div class="sectionHead"><h2>Cost combustibil</h2><label>Perioadă<select id="fuelPeriod"><option value="day">Zi</option><option value="week">Săptămână</option><option value="month" selected>Lună</option><option value="all">Toate</option></select></label><input type="date" id="fuelDate" value="${today}"></div>
