@@ -1,0 +1,16 @@
+{
+  "name": "Manager de Șantier ALPODEC",
+  "short_name": "ALPODEC",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#111827",
+  "icons": [
+    {
+      "src": "/alpodec-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
