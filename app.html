@@ -191,10 +191,24 @@ function closeMobileMenu(){document.body.classList.remove('mobileMenuOpen')}
 function renderNav(){
  const n=nav(), side=$('sideNav');
  if(me.role==='admin'){
-  const order=['dashboard','sites','reports','newReport','documents','finance','sitecontrol','measurements','costs','attendance','prices','procurement','fuel','procurementSettings','users','broadcast','notifications','settings','profile'];
-  const icons={dashboard:'⌂',sites:'▤',reports:'▦',newReport:'＋',documents:'▧',finance:'▥',sitecontrol:'◫',measurements:'⌗',costs:'◈',attendance:'◷',prices:'≡',procurement:'▣',fuel:'◉',procurementSettings:'⚙',users:'♙',broadcast:'✉',notifications:'♧',settings:'⚙',profile:'◉'};
-  const labels={dashboard:'Acasă',sites:'Șantiere',reports:'Rapoarte',newReport:'Raport nou',documents:'Devize și oferte',finance:'Contracte și încasări',sitecontrol:'Fișa șantierelor',measurements:'Măsurători',costs:'Centru de cost',attendance:'Pontaj și salarii',prices:'Lista de prețuri',procurement:'Aprovizionare',fuel:'Bonuri combustibil',procurementSettings:'Responsabili aprovizionare',users:'Utilizatori',broadcast:'Informări',notifications:'Notificări',settings:'Personalizare',profile:'Profilul meu'};
-  side.innerHTML='<button type="button" class="sideCollapse" id="sideCollapse" title="Restrânge / extinde meniul">☰ <span>Restrânge meniul</span></button>'+order.map(id=>{const item=n.find(x=>x[0]===id);return item?'<button type="button" data-page="'+id+'" class="homeNav '+(page===id?'active':'')+'" title="'+esc(labels[id]||item[1])+'"><span class="navIcon">'+icons[id]+'</span><span class="navLabel">'+esc(labels[id]||item[1])+'</span></button>':''}).join('');
+  const groups=[
+   ['Șantiere','▤',['sites','sitecontrol','measurements','prices']],
+   ['Rapoarte','▦',['reports','newReport']],
+   ['Devize și documente','▧',['documents']],
+   ['Financiar','▥',['finance','costs','fuel']],
+   ['Personal','◷',['attendance']],
+   ['Administrare','⚙',['procurement','procurementSettings','users','broadcast','notifications','settings','profile']]
+  ];
+  const labels={sites:'Șantiere',sitecontrol:'Fișa șantierelor',measurements:'Măsurători',prices:'Lista de prețuri',reports:'Rapoarte',newReport:'Raport nou',documents:'Devize și oferte',finance:'Contracte și încasări',costs:'Centru de cost',fuel:'Bonuri combustibil',attendance:'Pontaj și salarii',procurement:'Aprovizionare',procurementSettings:'Responsabili aprovizionare',users:'Utilizatori',broadcast:'Informări',notifications:'Notificări',settings:'Personalizare',profile:'Profilul meu'};
+  const activeGroup=groups.find(g=>g[2].includes(page))?.[0];
+  if(!openNavGroup)openNavGroup=activeGroup||'';
+  side.innerHTML='<button type="button" class="sideCollapse" id="sideCollapse" title="Restrânge / extinde meniul">☰ <span>Restrânge meniul</span></button><button type="button" data-page="dashboard" class="homeNav '+(page==='dashboard'?'active':'')+'" title="Acasă"><span class="navIcon">⌂</span><span class="navLabel">Acasă</span></button>'+groups.map(([name,icon,ids])=>{
+    const available=ids.filter(id=>n.some(x=>x[0]===id));
+    if(!available.length)return '';
+    const expanded=openNavGroup===name;
+    return '<div class="navGroup"><button type="button" class="navGroupHead '+(expanded?'expanded ':'')+(ids.includes(page)?'groupActive':'')+'" data-group="'+esc(name)+'" aria-expanded="'+expanded+'" title="'+esc(name)+'"><span class="navIcon">'+icon+'</span><span class="navLabel">'+esc(name)+'</span><span class="navChevron">'+(expanded?'⌄':'›')+'</span></button><div class="navChildren '+(expanded?'':'hidden')+'">'+available.map(id=>'<button type="button" data-page="'+id+'" class="'+(page===id?'active':'')+'">'+esc(labels[id]||n.find(x=>x[0]===id)[1])+'</button>').join('')+'</div></div>';
+  }).join('');
+  side.querySelectorAll('[data-group]').forEach(b=>b.onclick=()=>{openNavGroup=openNavGroup===b.dataset.group?'':b.dataset.group;renderNav()});
   side.querySelector('#sideCollapse').onclick=()=>{document.body.classList.toggle('sidebarCollapsed');try{localStorage.setItem('sidebarCollapsed',document.body.classList.contains('sidebarCollapsed')?'1':'0')}catch(e){}};
  }else{side.innerHTML=n.map(([id,l])=>'<button data-page="'+id+'" class="'+(page===id?'active':'')+'">'+esc(l)+'</button>').join('')}
  const quick=me.role==='admin'?[['dashboard','⌂','Acasă'],['sites','▤','Șantiere'],['newReport','＋','Raport'],['fuel','⛽','Bonuri']]:[['dashboard','⌂','Acasă'],['newReport','＋','Raport'],['myProgress','◷','Pontaj'],['reports','▦','Rapoarte']];if(me.role!=='admin'&&canFuel())quick.splice(3,1,['fuel','⛽','Bonuri']);
