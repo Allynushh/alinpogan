@@ -160,7 +160,7 @@ table{min-width:760px;font-size:13px}.card:has(table){overflow-x:auto}
   </div>
 </div>
 <div id="appView" class="shell hidden">
-  <aside class="sidebar"><div class="brand"><img id="sideLogo" src="https://alpodec.ro/wp-content/themes/alpodec-premium/alpodec-logo-dark-transparent.png" alt="ALPODEC — We Build. We Innovate. We Design." style="display:block;width:205px;max-width:100%;height:auto;max-height:115px;object-fit:contain;object-position:left center;background:transparent;filter:none;margin:0 0 12px"><span id="sideCompany">Manager Șantier</span><small id="roleSide"></small></div><div id="sideNav" class="nav"></div></aside>
+  <aside class="sidebar"><div class="brand"><img id="sideLogo" src="https://alpodec.ro/wp-content/themes/alpodec-premium/alpodec-logo-dark-transparent.png" alt="ALPODEC — We Build. We Innovate. We Design." style="display:block;width:205px;max-width:100%;height:auto;max-height:115px;object-fit:contain;object-position:left center;background:transparent;filter:none;margin:0 0 12px"><span id="sideCompany">Cont utilizator</span><small id="roleSide"></small></div><div id="sideNav" class="nav"></div></aside>
   <main class="main"><div class="topbar"><div class="title"><h1 id="pageTitle"></h1><p id="pageSub"></p></div><div class="userBox"><span id="userBadge" class="badge"></span><button id="logout" class="btn secondary small">Ieșire</button></div></div><div id="content"></div></main>
   <div id="mobileDrawer" class="mobileDrawer" aria-label="Meniu module"></div><div id="mobileNav" class="mobileNav"></div>
 </div>
@@ -218,7 +218,7 @@ function vapidKey(s){const p='='.repeat((4-s.length%4)%4),b=(s+p).replace(/-/g,'
 async function pushSubscriptionState(){try{if(!('serviceWorker'in navigator)||!('PushManager'in window)||Notification.permission!=='granted')return false;const reg=await navigator.serviceWorker.ready;return !!(await reg.pushManager.getSubscription())}catch(e){return false}}
 async function enablePushNotifications(){if(!('serviceWorker'in navigator)||!('PushManager'in window))throw new Error('Acest telefon/browser nu suportă notificări push.');const perm=await Notification.requestPermission();if(perm!=='granted')throw new Error('Notificările nu au fost permise.');const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:vapidKey(VAPID_PUBLIC_KEY)});const j=sub.toJSON();await q(sb.from('push_subscriptions').upsert({user_id:me.id,endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth,user_agent:navigator.userAgent,updated_at:new Date().toISOString()},{onConflict:'endpoint'}));return true}
 async function sendPush(body){const {data,error}=await sb.functions.invoke('send-push',{body});if(error)throw error;return data}
-async function loadCompany(){try{const x=await q(sb.from('company_settings').select('*').eq('id',1).single());cache.company=x;if(x.company_name){$('loginCompany').textContent=x.company_name;$('sideCompany').textContent=x.company_name;document.title=x.company_name}$('loginLogo').src='https://alpodec.ro/wp-content/themes/alpodec-premium/alpodec-logo-dark-transparent.png';$('loginLogo').classList.remove('hidden');$('sideLogo').src='https://alpodec.ro/wp-content/themes/alpodec-premium/alpodec-logo-dark-transparent.png';$('sideLogo').classList.remove('hidden')}catch(e){}}
+async function loadCompany(){try{const x=await q(sb.from('company_settings').select('*').eq('id',1).single());cache.company=x;if(x.company_name){$('loginCompany').textContent=x.company_name;document.title=x.company_name}$('loginLogo').src='https://alpodec.ro/wp-content/themes/alpodec-premium/alpodec-logo-dark-transparent.png';$('loginLogo').classList.remove('hidden');$('sideLogo').src='https://alpodec.ro/wp-content/themes/alpodec-premium/alpodec-logo-dark-transparent.png';$('sideLogo').classList.remove('hidden')}catch(e){}}
 async function getMe(){let r=await q(sb.rpc('get_my_profile'));if(!r?.length){await new Promise(x=>setTimeout(x,400));r=await q(sb.rpc('get_my_profile'))}if(!r?.length)throw new Error('Profilul utilizatorului nu a fost creat.');me=r[0];if(me.role!=='admin'){await q(sb.rpc('claim_admin_if_none'));r=await q(sb.rpc('get_my_profile'));me=r[0]}try{const a=await q(sb.from('cost_center_access').select('*').eq('user_id',me.id).maybeSingle());me.cost_access=!!(a&&(a.can_view||a.can_add||a.can_edit||a.can_delete));me.cost_permissions=a||null}catch(e){me.cost_access=false;me.cost_permissions=null}try{const pm=await q(sb.from('procurement_managers').select('user_id').eq('user_id',me.id).maybeSingle());me.procurement_manager=!!pm}catch(e){me.procurement_manager=false}return me}
 async function boot(){
   await loadCompany();
@@ -247,7 +247,7 @@ async function boot(){
   }
 }
 function showLogin(){$('appView').classList.add('hidden');$('loginView').classList.remove('hidden')}
-function showApp(){$('loginView').classList.add('hidden');$('appView').classList.remove('hidden');$('roleSide').textContent=me.role==='admin'?'Administrator':'Angajat';$('userBadge').textContent=`${me.full_name} • ${me.role==='admin'?'Administrator':'Angajat'}`;renderNav()}
+function showApp(){$('loginView').classList.add('hidden');$('appView').classList.remove('hidden');$('sideCompany').textContent=me.full_name||'Utilizator';$('roleSide').textContent=me.role==='admin'?'Administrator':'Angajat';$('userBadge').textContent=`${me.full_name} • ${me.role==='admin'?'Administrator':'Angajat'}`;renderNav()}
 async function loadReports(){cache.reports=await q(sb.rpc('get_reports'));cache.photos=await q(sb.from('report_photos').select('id,report_id,storage_path,user_id,created_at').order('created_at',{ascending:true}));return cache.reports}
 async function loadSites(){cache.sites=await q(sb.rpc('get_my_assigned_sites'));return cache.sites}
 async function loadAdminBase(){if(me.role!=='admin')return;cache.sites=await q(sb.from('sites').select('*').order('name'));cache.works=await q(sb.from('works').select('*').eq('active',true).order('category').order('name'));cache.prices=await q(sb.from('work_unit_prices').select('work_id,unit,unit_price'));cache.siteCategories=[];}
@@ -904,7 +904,7 @@ input[type=file]{max-width:100%;font-size:14px}
 <div id="appUpdateBanner" role="status" aria-live="polite"><div class="updateCopy"><strong>Este disponibilă o versiune nouă</strong><span>Actualizează aplicația pentru cele mai recente îmbunătățiri.</span></div><button type="button" id="appUpdateNow">Actualizează</button></div>
 <script>
 (function(){
- const CURRENT_APP_VERSION='2026.11.04.12';
+ const CURRENT_APP_VERSION='2026.11.04.13';
  const banner=document.getElementById('appUpdateBanner');
  const button=document.getElementById('appUpdateNow');
  let checking=false,availableVersion='';
