@@ -874,7 +874,7 @@ input[type=file]{max-width:100%;font-size:14px}
 <div id="appUpdateBanner" role="status" aria-live="polite"><div class="updateCopy"><strong>Este disponibilă o versiune nouă</strong><span>Actualizează aplicația pentru cele mai recente îmbunătățiri.</span></div><button type="button" id="appUpdateNow">Actualizează</button></div>
 <script>
 (function(){
- const CURRENT_APP_VERSION='2026.11.04.4';
+ const CURRENT_APP_VERSION='2026.11.04.6';
  const banner=document.getElementById('appUpdateBanner');
  const button=document.getElementById('appUpdateNow');
  let checking=false,availableVersion='';
@@ -886,7 +886,7 @@ input[type=file]{max-width:100%;font-size:14px}
    if(!response.ok)return;
    const data=await response.json();
    if(typeof data.version==='string'){
-    if(data.version>CURRENT_APP_VERSION){availableVersion=data.version;banner.classList.add('visible')}
+    if(data.version!==CURRENT_APP_VERSION){availableVersion=data.version;banner.classList.add('visible')}
     else{availableVersion='';banner.classList.remove('visible');button.disabled=false;button.textContent='Actualizează'}
    }
   }catch(e){console.warn('Nu am putut verifica actualizările aplicației',e)}
