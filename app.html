@@ -15,6 +15,8 @@
 @media print{
  body{background:#fff!important;color:#111!important}.sidebar,.topbar,.mobileNav,.no-print,#toast{display:none!important}.shell{display:block!important}.main{padding:0!important}.card{box-shadow:none!important;border:0!important}.print-doc{display:block!important}.print-doc table{width:100%;border-collapse:collapse}.print-doc th,.print-doc td{border:1px solid #555;padding:7px}.print-doc th{background:#ffeb00!important;color:#000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.print-doc .zone{font-weight:700}.print-doc input{border:0!important;background:transparent!important;padding:0!important}.print-doc .hide-print{display:none!important}}
 
+/* Sidebar brand on dark background */
+.sideWordmark{width:100%;max-width:215px;margin:0 0 15px;padding:8px 0 10px;background:transparent;text-align:left}.sideWordmarkName{font-family:Arial,Helvetica,sans-serif;font-size:37px;line-height:1;font-weight:900;letter-spacing:-1.8px;color:#fff;white-space:nowrap}.sideWordmarkName span{color:#d31319}.sideWordmarkTag{font-family:Arial,Helvetica,sans-serif;font-size:8px;letter-spacing:.4px;font-weight:700;color:#c8d3df;margin-top:8px;white-space:nowrap}
 /* Compact grouped desktop navigation */
 .nav .homeNav{display:flex;align-items:center;gap:9px;width:100%;padding:11px 12px;margin:3px 0 10px;border-radius:10px;font-size:14px;font-weight:800;color:#e4eaf1;background:transparent;text-align:left}.nav .homeNav.active{background:#26394c;color:#fff;border-left:3px solid #e8b65a}.sidebarCollapsed .nav .homeNav{justify-content:center;padding:11px 6px}.sidebarCollapsed .nav .homeNav .navIcon{font-size:20px}
 
@@ -158,7 +160,7 @@ table{min-width:760px;font-size:13px}.card:has(table){overflow-x:auto}
   </div>
 </div>
 <div id="appView" class="shell hidden">
-  <aside class="sidebar"><div class="brand"><img id="sideLogo" src="https://alpodec.ro/wp-content/themes/alpodec-premium/alpodec-logo-dark-transparent.png" style="filter:url(#alpodec-black-red);width:175px;max-width:100%;max-height:90px;object-fit:contain;background:#fff;border-radius:7px;padding:7px;margin-bottom:8px" alt="Logo"><span id="sideCompany">Manager Șantier</span><small id="roleSide"></small></div><div id="sideNav" class="nav"></div></aside>
+  <aside class="sidebar"><div class="brand"><div id="sideLogo" class="sideWordmark" role="img" aria-label="ALPODEC — We Build. We Innovate. We Design."><div class="sideWordmarkName"><span>ALPO</span>DEC</div><div class="sideWordmarkTag">WE BUILD. WE INNOVATE. WE DESIGN.</div></div><span id="sideCompany">Manager Șantier</span><small id="roleSide"></small></div><div id="sideNav" class="nav"></div></aside>
   <main class="main"><div class="topbar"><div class="title"><h1 id="pageTitle"></h1><p id="pageSub"></p></div><div class="userBox"><span id="userBadge" class="badge"></span><button id="logout" class="btn secondary small">Ieșire</button></div></div><div id="content"></div></main>
   <div id="mobileDrawer" class="mobileDrawer" aria-label="Meniu module"></div><div id="mobileNav" class="mobileNav"></div>
 </div>
@@ -902,7 +904,7 @@ input[type=file]{max-width:100%;font-size:14px}
 <div id="appUpdateBanner" role="status" aria-live="polite"><div class="updateCopy"><strong>Este disponibilă o versiune nouă</strong><span>Actualizează aplicația pentru cele mai recente îmbunătățiri.</span></div><button type="button" id="appUpdateNow">Actualizează</button></div>
 <script>
 (function(){
- const CURRENT_APP_VERSION='2026.11.04.10';
+ const CURRENT_APP_VERSION='2026.11.04.11';
  const banner=document.getElementById('appUpdateBanner');
  const button=document.getElementById('appUpdateNow');
  let checking=false,availableVersion='';
