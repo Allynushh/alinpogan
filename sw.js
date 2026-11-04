@@ -1,5 +1,5 @@
 /* ALPODEC PWA: cache only the app shell, never authenticated API responses. */
-const CACHE='alpodec-shell-v5';
+const CACHE='alpodec-shell-v6';
 const SHELL=['/','/index.html','/app.html','/alpodec-icon.svg','/icon-180.png','/icon-192.png','/icon-512.png','/manifest.webmanifest'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('alpodec-shell-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()))});
